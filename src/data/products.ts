@@ -15,7 +15,7 @@ export const products: Product[] = [
     images: [productCamouflage],
     category: 'camouflage',
     variants: [
-      { id: 'noir', name: 'Noir', price: 39.00, inStock: true },
+      { id: 'noir', name: 'Noir', price: 38.00, inStock: true },
     ],
     ingredients: [
       'Cire d\'abeille naturelle',
