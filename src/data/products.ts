@@ -10,7 +10,7 @@ export const products: Product[] = [
     slug: 'creme-camouflante-noire',
     description: 'Notre crème camouflante noire offre une couverture naturelle et imperceptible pour les zones clairsemées. Formulée avec des pigments micronisés de haute qualité, elle s\'adapte parfaitement à votre cuir chevelu pour un résultat invisible et durable.',
     shortDescription: 'Couverture naturelle pour zones clairsemées',
-    price: 39.00,
+    price: 38.00,
     compareAtPrice: 49.00,
     images: [productCamouflage],
     category: 'camouflage',
