@@ -44,7 +44,7 @@ const About = () => {
               À propos de Happy Hair Lab
             </h1>
             <p className="text-lg text-muted-foreground leading-relaxed">
-              Chez Happy Hair Lab, nous croyons que chaque homme mérite des solutions 
+              Chez Happy Hair Lab, nous avons la conviction que chacun mérite des solutions 
               capillaires efficaces, naturelles et discrètes. Notre mission : vous aider 
               à prendre soin de vos cheveux avec des produits premium qui font vraiment 
               la différence.
