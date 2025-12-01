@@ -4,6 +4,7 @@ import { ShoppingBag, Menu, X, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/contexts/CartContext';
 import { cn } from '@/lib/utils';
+import logo from '@/assets/logo.jpg';
 
 const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -43,9 +44,9 @@ const Header = () => {
           {/* Logo */}
           <Link 
             to="/" 
-            className="flex items-center gap-2 text-xl md:text-2xl font-semibold text-foreground hover:text-accent transition-colors"
+            className="flex items-center"
           >
-            <span className="tracking-tight">Happy Hair Lab</span>
+            <img src={logo} alt="Happy Hair Lab" className="h-10 md:h-12 w-auto" />
           </Link>
 
           {/* Desktop Navigation */}
