@@ -49,7 +49,16 @@ const Header = () => {
           >
             <img src={logo} alt="Happy Hair Lab" className="h-20 md:h-20 w-auto" />
           </Link>
-
+          <div
+  className={cn(
+    "px-4 py-2 rounded text-white",
+    isScrolled ? "bg-gray-800" : "bg-gray-600",
+    "transition-colors",
+    "md:flex hidden"
+  )}
+>
+  Test Dark Mode
+</div>
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-8">
             {navLinks.map(link => (
