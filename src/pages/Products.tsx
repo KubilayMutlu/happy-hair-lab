@@ -1,9 +1,10 @@
 import { useState, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { Loader2 } from 'lucide-react';
 import Layout from '@/components/layout/Layout';
 import ProductCard from '@/components/product/ProductCard';
-import { products } from '@/data/products';
+import { useProducts } from '@/hooks/useProducts';
 import { cn } from '@/lib/utils';
 
 type CategoryFilter = 'all' | 'anti-chute' | 'camouflage';
@@ -13,10 +14,13 @@ const Products = () => {
   const initialCategory = searchParams.get('category') as CategoryFilter || 'all';
   const [activeFilter, setActiveFilter] = useState<CategoryFilter>(initialCategory);
 
+  const { data: products, isLoading, error } = useProducts();
+
   const filteredProducts = useMemo(() => {
+    if (!products) return [];
     if (activeFilter === 'all') return products;
     return products.filter(p => p.category === activeFilter);
-  }, [activeFilter]);
+  }, [products, activeFilter]);
 
   const handleFilterChange = (filter: CategoryFilter) => {
     setActiveFilter(filter);
@@ -77,21 +81,39 @@ const Products = () => {
             ))}
           </motion.div>
 
-          {/* Products Grid */}
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {filteredProducts.map((product, index) => (
-              <motion.div
-                key={product.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: index * 0.05 }}
-              >
-                <ProductCard product={product} />
-              </motion.div>
-            ))}
-          </div>
+          {/* Loading State */}
+          {isLoading && (
+            <div className="flex items-center justify-center py-20">
+              <Loader2 className="w-8 h-8 animate-spin text-primary" />
+            </div>
+          )}
 
-          {filteredProducts.length === 0 && (
+          {/* Error State */}
+          {error && (
+            <div className="text-center py-16">
+              <p className="text-destructive">
+                Erreur lors du chargement des produits.
+              </p>
+            </div>
+          )}
+
+          {/* Products Grid */}
+          {!isLoading && !error && (
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {filteredProducts.map((product, index) => (
+                <motion.div
+                  key={product.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4, delay: index * 0.05 }}
+                >
+                  <ProductCard product={product} />
+                </motion.div>
+              ))}
+            </div>
+          )}
+
+          {!isLoading && !error && filteredProducts.length === 0 && (
             <div className="text-center py-16">
               <p className="text-muted-foreground">
                 Aucun produit trouvé dans cette catégorie.
