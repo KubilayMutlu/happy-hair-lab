@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { ShoppingBag, Menu, X, User } from 'lucide-react';
+import { ShoppingBag, Menu, X, User, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/contexts/CartContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
 import logo from '@/assets/logo.jpg';
 import DarkModeToggle from "@/components/DarkModeToggle";
@@ -11,6 +12,7 @@ const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { openCart, totalItems } = useCart();
+  const { user, isAdmin } = useAuth();
   const location = useLocation();
 
   useEffect(() => {
@@ -70,9 +72,16 @@ const Header = () => {
 
           {/* Actions */}
           <div className="flex items-center gap-2">
+            {isAdmin && (
+              <Link to="/admin" className="hidden md:flex">
+                <Button variant="ghost" size="icon" className="text-primary">
+                  <Shield className="h-5 w-5" />
+                </Button>
+              </Link>
+            )}
             <Link to="/compte">
               <Button variant="ghost" size="icon" className="hidden md:flex">
-                <User className="h-5 w-5" />
+                <User className={cn("h-5 w-5", user && "text-primary")} />
               </Button>
             </Link>
             
