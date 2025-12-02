@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { useCart } from '@/contexts/CartContext';
 import { cn } from '@/lib/utils';
 import logo from '@/assets/logo.jpg';
+import DarkModeToggle from "@/components/DarkModeToggle";
 
 const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -74,6 +75,8 @@ const Header = () => {
                 <User className="h-5 w-5" />
               </Button>
             </Link>
+            
+            <DarkModeToggle />
             
             <Button 
               variant="ghost" 
