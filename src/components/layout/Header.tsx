@@ -47,7 +47,7 @@ const Header = () => {
             to="/" 
             className="flex items-center"
           >
-            <img src={logo} alt="Happy Hair Lab" className="h-10 md:h-12 w-auto" />
+            <img src={logo} alt="Happy Hair Lab" className="h-16 md:h-16 w-auto" />
           </Link>
 
           {/* Desktop Navigation */}
