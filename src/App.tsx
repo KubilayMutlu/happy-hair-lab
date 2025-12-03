@@ -11,6 +11,7 @@ import ProductDetail from "./pages/ProductDetail";
 import Articles from "./pages/Articles";
 import About from "./pages/About";
 import Account from "./pages/Account";
+import AccountOrders from "./pages/account/Orders";
 import NotFound from "./pages/NotFound";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminProducts from "./pages/admin/AdminProducts";
@@ -35,6 +36,7 @@ const App = () => (
               <Route path="/articles" element={<Articles />} />
               <Route path="/a-propos" element={<About />} />
               <Route path="/compte" element={<Account />} />
+              <Route path="/compte/commandes" element={<AccountOrders />} />
               {/* Admin Routes */}
               <Route path="/admin" element={<AdminDashboard />} />
               <Route path="/admin/produits" element={<AdminProducts />} />
