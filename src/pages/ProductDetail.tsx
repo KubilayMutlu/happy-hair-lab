@@ -6,15 +6,49 @@ import Layout from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
 import ProductCard from '@/components/product/ProductCard';
 import { useProduct, useProducts } from '@/hooks/useProducts';
+import { useCart } from '@/contexts/CartContext';
+import { Product } from '@/types/product';
 import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
 
 const ProductDetail = () => {
   const { slug } = useParams<{ slug: string }>();
   const { data: product, isLoading, error } = useProduct(slug || '');
   const { data: allProducts } = useProducts();
+  const { addItem } = useCart();
   
   const [quantity, setQuantity] = useState(1);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
+
+  const handleAddToCart = () => {
+    if (!product) return;
+    
+    // Transform DB product to match Product type for cart
+    const cartProduct: Product = {
+      id: product.id,
+      name: product.name,
+      slug: product.slug,
+      description: product.description || '',
+      shortDescription: product.short_description || '',
+      price: product.price,
+      compareAtPrice: product.compare_at_price || undefined,
+      images: product.images?.map(img => img.image_url) || [],
+      category: product.category as 'anti-chute' | 'camouflage',
+      ingredients: product.ingredients || [],
+      benefits: product.benefits || [],
+      howToUse: product.how_to_use || '',
+      expectedResults: product.expected_results || '',
+      reviews: [],
+      inStock: product.in_stock ?? true,
+      featured: product.featured ?? false,
+    };
+    
+    addItem(cartProduct, undefined, quantity);
+    toast.success(`${product.name} ajouté au panier`, {
+      description: `Quantité: ${quantity}`,
+    });
+    setQuantity(1);
+  };
 
   if (isLoading) {
     return (
@@ -160,6 +194,7 @@ const ProductDetail = () => {
               size="xl"
               className="w-full mb-6"
               disabled={!product.in_stock}
+              onClick={handleAddToCart}
             >
               {product.in_stock ? 'Ajouter au panier' : 'Rupture de stock'}
             </Button>
