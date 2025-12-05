@@ -6,10 +6,33 @@ import Layout from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { useCart } from '@/contexts/CartContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+
+const EUROPEAN_COUNTRIES = [
+  { code: 'FR', name: 'France' },
+  { code: 'BE', name: 'Belgique' },
+  { code: 'CH', name: 'Suisse' },
+  { code: 'LU', name: 'Luxembourg' },
+  { code: 'MC', name: 'Monaco' },
+  { code: 'DE', name: 'Allemagne' },
+  { code: 'ES', name: 'Espagne' },
+  { code: 'IT', name: 'Italie' },
+  { code: 'PT', name: 'Portugal' },
+  { code: 'NL', name: 'Pays-Bas' },
+  { code: 'AT', name: 'Autriche' },
+  { code: 'GB', name: 'Royaume-Uni' },
+  { code: 'IE', name: 'Irlande' },
+];
 
 const Checkout = () => {
   const navigate = useNavigate();
@@ -391,14 +414,21 @@ const Checkout = () => {
                 </div>
                 <div>
                   <Label htmlFor="country">Pays *</Label>
-                  <Input
-                    id="country"
-                    name="country"
+                  <Select
                     value={formData.country}
-                    onChange={handleInputChange}
-                    placeholder="France"
-                    className="mt-1"
-                  />
+                    onValueChange={(value) => setFormData(prev => ({ ...prev, country: value }))}
+                  >
+                    <SelectTrigger className="mt-1">
+                      <SelectValue placeholder="Sélectionnez un pays" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-popover border border-border">
+                      {EUROPEAN_COUNTRIES.map((country) => (
+                        <SelectItem key={country.code} value={country.name}>
+                          {country.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
             </motion.div>
@@ -471,6 +501,15 @@ const Checkout = () => {
                   </div>
                 ))}
               </div>
+
+              {/* Add more products link */}
+              <Link
+                to="/produits"
+                className="flex items-center justify-center gap-2 text-sm text-accent hover:underline mb-6 py-2 border border-dashed border-accent/30 rounded-lg hover:bg-accent/5 transition-colors"
+              >
+                <ShoppingBag className="w-4 h-4" />
+                Ajouter d'autres articles
+              </Link>
 
               {/* Promo Code */}
               <div className="mb-6">
@@ -561,15 +600,6 @@ const Checkout = () => {
               <p className="text-xs text-muted-foreground text-center mt-4">
                 Paiement sécurisé • Livraison sous 10-14 jours
               </p>
-
-              {/* Add more products link */}
-              <Link
-                to="/produits"
-                className="flex items-center justify-center gap-2 text-sm text-accent hover:underline mt-4"
-              >
-                <ShoppingBag className="w-4 h-4" />
-                Ajouter d'autres articles
-              </Link>
             </motion.div>
           </div>
         </div>
