@@ -13,6 +13,7 @@ import About from "./pages/About";
 import Account from "./pages/Account";
 import AccountOrders from "./pages/account/Orders";
 import Checkout from "./pages/Checkout";
+import CheckoutSuccess from "./pages/CheckoutSuccess";
 import NotFound from "./pages/NotFound";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminProducts from "./pages/admin/AdminProducts";
@@ -39,6 +40,7 @@ const App = () => (
               <Route path="/compte" element={<Account />} />
               <Route path="/compte/commandes" element={<AccountOrders />} />
               <Route path="/checkout" element={<Checkout />} />
+              <Route path="/checkout/success" element={<CheckoutSuccess />} />
               {/* Admin Routes */}
               <Route path="/admin" element={<AdminDashboard />} />
               <Route path="/admin/produits" element={<AdminProducts />} />

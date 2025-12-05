@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ChevronLeft, Minus, Plus, Trash2, Tag, CreditCard, Loader2 } from 'lucide-react';
+import { ChevronLeft, Minus, Plus, Trash2, Tag, CreditCard, Loader2, ShoppingBag } from 'lucide-react';
 import Layout from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -13,6 +13,7 @@ import { toast } from 'sonner';
 
 const Checkout = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { items, updateQuantity, removeItem, totalPrice, clearCart } = useCart();
   const { user } = useAuth();
   
@@ -36,6 +37,13 @@ const Checkout = () => {
     postalCode: '',
     country: 'France',
   });
+
+  // Show cancelled message if payment was cancelled
+  useEffect(() => {
+    if (searchParams.get('cancelled') === 'true') {
+      toast.error('Paiement annulé. Votre panier a été conservé.');
+    }
+  }, [searchParams]);
 
   // Load profile data if user is logged in
   useEffect(() => {
@@ -165,7 +173,7 @@ const Checkout = () => {
 
     setIsLoading(true);
     try {
-      // Create order
+      // Create order first
       const { data: order, error: orderError } = await supabase
         .from('orders')
         .insert({
@@ -216,10 +224,32 @@ const Checkout = () => {
 
       if (itemsError) throw itemsError;
 
-      // Clear cart and redirect
+      // Prepare items for Stripe
+      const stripeItems = items.map(item => ({
+        name: item.product.name,
+        price: item.variant?.price ?? item.product.price,
+        quantity: item.quantity,
+        variantName: item.variant?.name,
+        imageUrl: item.product.images[0],
+      }));
+
+      // Create Stripe checkout session
+      const { data: sessionData, error: stripeError } = await supabase.functions.invoke('create-checkout-session', {
+        body: {
+          items: stripeItems,
+          customerEmail: formData.email,
+          orderId: order.id,
+          shippingCost: shippingCost,
+          discount: discount,
+          promoCode: appliedPromo?.code,
+        },
+      });
+
+      if (stripeError) throw stripeError;
+
+      // Clear cart and redirect to Stripe
       clearCart();
-      toast.success('Commande créée avec succès !');
-      navigate('/compte/commandes');
+      window.location.href = sessionData.url;
     } catch (error) {
       console.error('Error creating order:', error);
       toast.error('Erreur lors de la création de la commande');
@@ -529,8 +559,17 @@ const Checkout = () => {
               </Button>
 
               <p className="text-xs text-muted-foreground text-center mt-4">
-                Paiement sécurisé • Livraison sous 3-5 jours
+                Paiement sécurisé • Livraison sous 10-14 jours
               </p>
+
+              {/* Add more products link */}
+              <Link
+                to="/produits"
+                className="flex items-center justify-center gap-2 text-sm text-accent hover:underline mt-4"
+              >
+                <ShoppingBag className="w-4 h-4" />
+                Ajouter d'autres articles
+              </Link>
             </motion.div>
           </div>
         </div>
