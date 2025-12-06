@@ -13,6 +13,7 @@ import ArticleDetail from "./pages/ArticleDetail";
 import About from "./pages/About";
 import Account from "./pages/Account";
 import AccountOrders from "./pages/account/Orders";
+import AccountSettings from "./pages/account/Settings";
 import Checkout from "./pages/Checkout";
 import CheckoutSuccess from "./pages/CheckoutSuccess";
 import NotFound from "./pages/NotFound";
@@ -41,6 +42,7 @@ const App = () => (
               <Route path="/a-propos" element={<About />} />
               <Route path="/compte" element={<Account />} />
               <Route path="/compte/commandes" element={<AccountOrders />} />
+              <Route path="/compte/parametres" element={<AccountSettings />} />
               <Route path="/checkout" element={<Checkout />} />
               <Route path="/checkout/success" element={<CheckoutSuccess />} />
               {/* Admin Routes */}
