@@ -325,9 +325,50 @@ const Orders = () => {
                   <span className="font-medium">{formatPrice(item.unit_price * item.quantity)}</span>
                 </div>
               ))}
-              <div className="flex justify-between items-center pt-3 border-t border-border font-semibold">
-                <span>Total</span>
-                <span>{formatPrice(order.total_amount)}</span>
+              
+              {/* Order Total Breakdown */}
+              <div className="pt-3 border-t border-border space-y-2">
+                {/* Subtotal */}
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-muted-foreground">Sous-total</span>
+                  <span>{formatPrice(order.order_items.reduce((sum, item) => sum + (item.unit_price * item.quantity), 0))}</span>
+                </div>
+                
+                {/* Shipping */}
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-muted-foreground">Livraison</span>
+                  <span>
+                    {(() => {
+                      const subtotal = order.order_items.reduce((sum, item) => sum + (item.unit_price * item.quantity), 0);
+                      const shippingCost = order.total_amount - subtotal;
+                      if (shippingCost <= 0) return 'Offerte';
+                      return formatPrice(shippingCost);
+                    })()}
+                  </span>
+                </div>
+                
+                {/* Discount if applicable */}
+                {(() => {
+                  const subtotal = order.order_items.reduce((sum, item) => sum + (item.unit_price * item.quantity), 0);
+                  const shippingCost = subtotal >= 50 ? 0 : 4.95;
+                  const expectedTotal = subtotal + shippingCost;
+                  const discount = expectedTotal - order.total_amount;
+                  if (discount > 0.01) {
+                    return (
+                      <div className="flex justify-between items-center text-sm text-green-600">
+                        <span>Remise</span>
+                        <span>-{formatPrice(discount)}</span>
+                      </div>
+                    );
+                  }
+                  return null;
+                })()}
+                
+                {/* Total */}
+                <div className="flex justify-between items-center pt-2 border-t border-border font-semibold">
+                  <span>Total</span>
+                  <span>{formatPrice(order.total_amount)}</span>
+                </div>
               </div>
             </div>
 
