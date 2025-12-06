@@ -2,6 +2,9 @@ import { Link } from 'react-router-dom';
 import { ShoppingBag, ImageOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { useCart } from '@/contexts/CartContext';
+import { useToast } from '@/hooks/use-toast';
+import { Product } from '@/types/product';
 
 // Generic product interface that works with both static and DB products
 interface ProductCardProduct {
@@ -13,8 +16,16 @@ interface ProductCardProduct {
   compareAtPrice?: number | null;
   short_description?: string | null;
   shortDescription?: string;
+  description?: string | null;
   category: string;
   images?: { image_url: string }[] | string[];
+  in_stock?: boolean;
+  inStock?: boolean;
+  featured?: boolean;
+  ingredients?: string[] | null;
+  benefits?: string[] | null;
+  how_to_use?: string | null;
+  expected_results?: string | null;
 }
 
 interface ProductCardProps {
@@ -23,6 +34,9 @@ interface ProductCardProps {
 }
 
 const ProductCard = ({ product, className }: ProductCardProps) => {
+  const { addItem } = useCart();
+  const { toast } = useToast();
+  
   // Handle both DB format (compare_at_price) and static format (compareAtPrice)
   const compareAtPrice = product.compare_at_price ?? product.compareAtPrice;
   const shortDescription = product.short_description ?? product.shortDescription;
@@ -35,8 +49,44 @@ const ProductCard = ({ product, className }: ProductCardProps) => {
     return firstImage.image_url;
   };
   
+  const getImagesArray = (): string[] => {
+    if (!product.images || product.images.length === 0) return [];
+    return product.images.map(img => typeof img === 'string' ? img : img.image_url);
+  };
+  
   const imageUrl = getImageUrl();
   const hasDiscount = compareAtPrice && compareAtPrice > product.price;
+
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    // Convert to Product type for cart
+    const cartProduct: Product = {
+      id: product.id,
+      name: product.name,
+      slug: product.slug,
+      price: product.price,
+      compareAtPrice: compareAtPrice ?? undefined,
+      description: product.description || '',
+      shortDescription: shortDescription || '',
+      images: getImagesArray(),
+      category: product.category as 'anti-chute' | 'camouflage',
+      inStock: product.in_stock ?? product.inStock ?? true,
+      featured: product.featured ?? false,
+      ingredients: product.ingredients || [],
+      benefits: product.benefits || [],
+      howToUse: product.how_to_use || '',
+      expectedResults: product.expected_results || '',
+      reviews: [],
+    };
+    
+    addItem(cartProduct);
+    toast({
+      title: "Ajouté au panier",
+      description: `${product.name} a été ajouté à votre panier.`,
+    });
+  };
 
   return (
     <Link
@@ -80,11 +130,7 @@ const ProductCard = ({ product, className }: ProductCardProps) => {
             size="icon"
             variant="gold"
             className="rounded-full"
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              // Note: Cart functionality would need to be updated for DB products
-            }}
+            onClick={handleAddToCart}
           >
             <ShoppingBag className="h-4 w-4" />
           </Button>
