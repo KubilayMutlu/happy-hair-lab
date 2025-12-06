@@ -1,13 +1,24 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Package, Truck, CheckCircle, Clock, RefreshCw, ChevronDown, ChevronUp, MapPin, ArrowLeft } from 'lucide-react';
+import { Package, Truck, CheckCircle, Clock, RefreshCw, ChevronDown, ChevronUp, MapPin, ArrowLeft, Trash2 } from 'lucide-react';
 import Layout from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCart } from '@/contexts/CartContext';
 import { useToast } from '@/hooks/use-toast';
 import { Product, ProductVariant } from '@/types/product';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
 
@@ -52,9 +63,10 @@ const statusConfig: Record<string, { label: string; icon: React.ElementType; col
 
 const Orders = () => {
   const { user, isLoading: authLoading } = useAuth();
-  const { addItem } = useCart();
+  const { addItem, openCart } = useCart();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const [deletingOrderId, setDeletingOrderId] = useState<string | null>(null);
   
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -175,6 +187,7 @@ const Orders = () => {
         }
       }
       
+      openCart();
       toast({
         title: 'Articles ajoutés',
         description: 'Les articles ont été ajoutés à votre panier.',
@@ -186,6 +199,42 @@ const Orders = () => {
         description: 'Impossible de renouveler la commande.',
         variant: 'destructive',
       });
+    }
+  };
+
+  const handleDeleteOrder = async (orderId: string) => {
+    setDeletingOrderId(orderId);
+    try {
+      // First delete order items
+      const { error: itemsError } = await supabase
+        .from('order_items')
+        .delete()
+        .eq('order_id', orderId);
+
+      if (itemsError) throw itemsError;
+
+      // Then delete the order
+      const { error: orderError } = await supabase
+        .from('orders')
+        .delete()
+        .eq('id', orderId);
+
+      if (orderError) throw orderError;
+
+      setOrders(prev => prev.filter(o => o.id !== orderId));
+      toast({
+        title: 'Commande supprimée',
+        description: 'La commande a été supprimée avec succès.',
+      });
+    } catch (error) {
+      console.error('Error deleting order:', error);
+      toast({
+        title: 'Erreur',
+        description: 'Impossible de supprimer la commande.',
+        variant: 'destructive',
+      });
+    } finally {
+      setDeletingOrderId(null);
     }
   };
 
@@ -379,8 +428,8 @@ const Orders = () => {
               </div>
             )}
 
-            {/* Reorder Button */}
-            <div className="p-4 md:p-6 border-t border-border">
+            {/* Action Buttons */}
+            <div className="p-4 md:p-6 border-t border-border space-y-3">
               <Button
                 variant="outline"
                 className="w-full"
@@ -389,6 +438,39 @@ const Orders = () => {
                 <RefreshCw className="w-4 h-4 mr-2" />
                 Renouveler cette commande
               </Button>
+              
+              {/* Delete button only for pending orders */}
+              {order.status === 'pending' && (
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button
+                      variant="destructive"
+                      className="w-full"
+                      disabled={deletingOrderId === order.id}
+                    >
+                      <Trash2 className="w-4 h-4 mr-2" />
+                      {deletingOrderId === order.id ? 'Suppression...' : 'Supprimer cette commande'}
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Supprimer la commande ?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Cette action est irréversible. La commande sera définitivement supprimée.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Annuler</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={() => handleDeleteOrder(order.id)}
+                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                      >
+                        Supprimer
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              )}
             </div>
           </div>
         )}
